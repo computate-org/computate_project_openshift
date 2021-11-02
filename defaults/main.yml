@@ -1,0 +1,5 @@
+---
+# The name of this application. 
+APP_NAME: "..."
+# THe path to the Ansible defaults for the application. 
+APP_DEFAULTS: "/usr/local/src/{{ APP_NAME }}/openshift/defaults.yml"

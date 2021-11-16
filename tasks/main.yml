@@ -4,91 +4,71 @@
 # Milestone: Automate Project Deployment
 # Column: Automate Project Deployment
 ---
-- name: "Include default variables in {{ APP_DEFAULTS }}"
+- name: "Include default variables in {{ SITE_DEFAULTS }}"
   include_vars:
-    file: "{{ APP_DEFAULTS }}"
+    file: "{{ SITE_DEFAULTS }}"
 
-#- name: Upload template configmap
-#  shell: "oc login {{APP_HOST}} --token={{APP_TOKEN}} && oc create configmap {{ APP_NAME }}-template --from-file=/usr/local/src/{{ APP_NAME }}-static/template/ --dry-run -o yaml -n {{APP_NAMESPACE}} | oc apply -n {{APP_NAMESPACE}} -f -"
-#  ignore_errors: true
-#
-#- name: Install {{ APP_NAME }} FTP persistent volume claim on OpenShift
-#  k8s: 
-#    state: present
-#    name: "{{ APP_NAME }}-persistent-volume-claim-ftp"
-#    host: "{{APP_HOST}}"
-#    api_key: "{{APP_TOKEN}}"
-#    namespace: "{{APP_NAMESPACE}}"
-#    definition: "{{ lookup('template', 'project_persistent_volume_claim_ftp.yml') }}"
-#    validate_certs: false
-#
-#- name: Install {{ APP_NAME }} image stream on OpenShift
-#  k8s:
-#    state: present
-#    name: "{{ APP_NAME }}"
-#    host: "{{APP_HOST}}"
-#    api_key: "{{APP_TOKEN}}"
-#    namespace: "{{APP_NAMESPACE}}"
-#    definition: "{{ lookup('template', 'project_image_stream.yml') }}"
-#    validate_certs: false
-#- name: Install {{ APP_NAME }} secret on OpenShift
-#  k8s:
-#    state: present
-#    name: "{{ APP_NAME }}-secret"
-#    host: "{{APP_HOST}}"
-#    api_key: "{{APP_TOKEN}}"
-#    namespace: "{{APP_NAMESPACE}}"
-#    definition: "{{ lookup('template', 'project_secret.yml') }}"
-#    validate_certs: false
-#- name: Install {{ APP_NAME }} keystore secrets on OpenShift
-#  k8s:
-#    state: present
-#    name: "{{ APP_NAME }}-keystore"
-#    host: "{{APP_HOST}}"
-#    api_key: "{{APP_TOKEN}}"
-#    namespace: "{{APP_NAMESPACE}}"
-#    definition: "{{ lookup('template', 'project_keystore.yml') }}"
-#    validate_certs: false
-- name: Install {{ APP_NAME }} build config 1 on OpenShift
+- name: Upload template configmap
+  shell: "oc login {{SITE_HOST}} --token={{SITE_TOKEN}} && oc create configmap {{ SITE_NAME }}-template --from-file={{ SITE_SRC }}-static/template/enUS/ --dry-run -o yaml -n {{SITE_NAMESPACE}} | oc apply -n {{SITE_NAMESPACE}} -f -"
+  ignore_errors: true
+- name: Install {{ SITE_NAME }} image stream on OpenShift
   k8s:
     state: present
-    name: "{{ APP_NAME }}"
-    host: "{{APP_HOST}}"
-    api_key: "{{APP_TOKEN}}"
-    namespace: "{{APP_NAMESPACE}}"
-    definition: "{{ lookup('template', '{{ APP_SRC }}/openshift/APP_BUILD_CONFIG_1.yml') }}"
+    name: "{{ SITE_NAME }}"
+    host: "{{SITE_HOST}}"
+    api_key: "{{SITE_TOKEN}}"
+    namespace: "{{SITE_NAMESPACE}}"
+    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_IMAGE_STREAM_1.yml') }}"
     validate_certs: false
-  when: APP_BUILD_CONFIG_1
-#- name: Install {{ APP_NAME }} deployment config on OpenShift
-#  k8s:
-#    state: present
-#    name: "{{ APP_NAME }}"
-#    host: "{{APP_HOST}}"
-#    api_key: "{{APP_TOKEN}}"
-#    namespace: "{{APP_NAMESPACE}}"
-#    definition: "{{ lookup('template', 'project_deployment_config.yml') }}"
-#    validate_certs: false
-#- name: Install {{ APP_NAME }} service on OpenShift
-#  k8s:
-#    state: present
-#    name: "{{ APP_NAME }}"
-#    host: "{{APP_HOST}}"
-#    api_key: "{{APP_TOKEN}}"
-#    namespace: "{{APP_NAMESPACE}}"
-#    definition: "{{ lookup('template', 'project_service.yml') }}"
-#    validate_certs: false
-#- name: Install {{ APP_NAME }} route on OpenShift
-#  k8s:
-#    state: present
-#    name: "{{ APP_NAME }}"
-#    host: "{{APP_HOST}}"
-#    api_key: "{{APP_TOKEN}}"
-#    namespace: "{{APP_NAMESPACE}}"
-#    definition: "{{ lookup('template', 'project_route.yml') }}"
-#    validate_certs: false
-#- name: Create Solr collection
-#  shell: "oc login {{APP_HOST}} --token={{REDHAT_OPENSHIFT_TOKEN}} && oc exec $(oc get pod -l app=computate-solr -o jsonpath='{.items[0].metadata.name}' -n {{ SOLR_NAMESPACE }}) -n {{ APP_NAME }} -- /opt/solr/bin/solr create_collection -c {{ APP_SOLR_COLLECTION }} -n computate || true"
-#  register: create_collection
-#- name: Print create_collection command
-#  debug:
-#    var: create_collection
+- name: Install {{ SITE_NAME }} secret on OpenShift
+  k8s:
+    state: present
+    name: "{{ SITE_NAME }}-secret"
+    host: "{{SITE_HOST}}"
+    api_key: "{{SITE_TOKEN}}"
+    namespace: "{{SITE_NAMESPACE}}"
+    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_SECRET_1.yml') }}"
+    validate_certs: false
+- name: Install {{ SITE_NAME }} build config 1 on OpenShift
+  k8s:
+    state: present
+    name: "{{ SITE_NAME }}"
+    host: "{{SITE_HOST}}"
+    api_key: "{{SITE_TOKEN}}"
+    namespace: "{{SITE_NAMESPACE}}"
+    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_BUILD_CONFIG_1.yml') }}"
+    validate_certs: false
+  when: SITE_BUILD_CONFIG_1
+- name: Install {{ SITE_NAME }} deployment config on OpenShift
+  k8s:
+    state: present
+    name: "{{ SITE_NAME }}"
+    host: "{{SITE_HOST}}"
+    api_key: "{{SITE_TOKEN}}"
+    namespace: "{{SITE_NAMESPACE}}"
+    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_DEPLOYMENT_CONFIG_1.yml') }}"
+    validate_certs: false
+- name: Install {{ SITE_NAME }} service on OpenShift
+  k8s:
+    state: present
+    name: "{{ SITE_NAME }}"
+    host: "{{SITE_HOST}}"
+    api_key: "{{SITE_TOKEN}}"
+    namespace: "{{SITE_NAMESPACE}}"
+    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_SERVICE_1.yml') }}"
+    validate_certs: false
+- name: Install {{ SITE_NAME }} route on OpenShift
+  k8s:
+    state: present
+    name: "{{ SITE_NAME }}"
+    host: "{{SITE_HOST}}"
+    api_key: "{{SITE_TOKEN}}"
+    namespace: "{{SITE_NAMESPACE}}"
+    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_ROUTE_1.yml') }}"
+    validate_certs: false
+- name: Create Solr collection
+  shell: "oc login {{ SOLR_HOST }} --token={{ REDHAT_OPENSHIFT_TOKEN }} && oc exec $(oc get pod -l app=solr -o jsonpath='{.items[0].metadata.name}' -n {{ SOLR_NAMESPACE }}) -n {{ SOLR_NAMESPACE }} -- /opt/solr/bin/solr create_collection -c {{ SITE_SOLR_COLLECTION_ENUS }} -n computate || true"
+  register: create_collection
+- name: Print create_collection command
+  debug:
+    var: create_collection

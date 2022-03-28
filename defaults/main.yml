@@ -1,3 +1,4 @@
 ---
 # The path to the Ansible defaults for the application. 
-SITE_DEFAULTS: "{{ lookup('env', 'HOME') }}/.local/src/{{ SITE_NAME }}/openshift/defaults.yml"
+SITE_SRC: "{{ lookup('env', 'HOME') }}/.local/src/{{ SITE_NAME }}"
+SITE_DEFAULTS: "{{ SITE_SRC }}/openshift/defaults.yml"

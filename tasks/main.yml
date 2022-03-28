@@ -66,6 +66,7 @@
     namespace: "{{SITE_NAMESPACE}}"
     definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_ROUTE_1.yml') }}"
     validate_certs: false
+  ignore_errors: true
 - name: Create Solr collection
   shell: "oc login {{ SOLR_HOST }} --token={{ REDHAT_OPENSHIFT_TOKEN }} && oc exec $(oc get pod -l app=solr -o jsonpath='{.items[0].metadata.name}' -n {{ SOLR_NAMESPACE }}) -n {{ SOLR_NAMESPACE }} -- /opt/solr/bin/solr create_collection -c {{ SITE_SOLR_COLLECTION_ENUS }} -n computate || true"
   register: create_collection

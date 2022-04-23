@@ -1,16 +1,8 @@
-# Label: project_openshift_tasks
-# Title: create the Ansible tasks for deploying the application to OpenShift
-# Mission: create the Ansible tasks for deploying the application to OpenShift
-# Milestone: Automate Project Deployment
-# Column: Automate Project Deployment
 ---
 - name: "Include default variables in {{ SITE_DEFAULTS }}"
   include_vars:
     file: "{{ SITE_DEFAULTS }}"
 
-- name: Upload template configmap
-  shell: "oc login {{SITE_HOST}} --token={{SITE_TOKEN}} && oc create configmap {{ SITE_NAME }}-template --from-file={{ SITE_SRC }}-static/template/enUS/ --dry-run -o yaml -n {{SITE_NAMESPACE}} | oc apply -n {{SITE_NAMESPACE}} -f -"
-  ignore_errors: true
 - name: Install {{ SITE_NAME }} image stream on OpenShift
   k8s:
     state: present

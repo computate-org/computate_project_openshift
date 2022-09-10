@@ -3,62 +3,120 @@
   include_vars:
     file: "{{ SITE_DEFAULTS }}"
 
-- name: Install {{ SITE_NAME }} image stream on OpenShift
-  k8s:
-    state: present
-    name: "{{ SITE_NAME }}"
-    host: "{{SITE_HOST}}"
-    api_key: "{{SITE_TOKEN}}"
-    namespace: "{{SITE_NAMESPACE}}"
-    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_IMAGE_STREAM_1.yml') }}"
-    validate_certs: false
-- name: Install {{ SITE_NAME }} secret on OpenShift
-  k8s:
-    state: present
-    name: "{{ SITE_NAME }}-secret"
-    host: "{{SITE_HOST}}"
-    api_key: "{{SITE_TOKEN}}"
-    namespace: "{{SITE_NAMESPACE}}"
-    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_SECRET_1.yml') }}"
-    validate_certs: false
-- name: Install {{ SITE_NAME }} build config 1 on OpenShift
-  k8s:
-    state: present
-    name: "{{ SITE_NAME }}"
-    host: "{{SITE_HOST}}"
-    api_key: "{{SITE_TOKEN}}"
-    namespace: "{{SITE_NAMESPACE}}"
-    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_BUILD_CONFIG_1.yml') }}"
-    validate_certs: false
-  when: SITE_BUILD_CONFIG_1
-- name: Install {{ SITE_NAME }} deployment config on OpenShift
-  k8s:
-    state: present
-    name: "{{ SITE_NAME }}"
-    host: "{{SITE_HOST}}"
-    api_key: "{{SITE_TOKEN}}"
-    namespace: "{{SITE_NAMESPACE}}"
-    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_DEPLOYMENT_CONFIG_1.yml') }}"
-    validate_certs: false
-- name: Install {{ SITE_NAME }} service on OpenShift
-  k8s:
-    state: present
-    name: "{{ SITE_NAME }}"
-    host: "{{SITE_HOST}}"
-    api_key: "{{SITE_TOKEN}}"
-    namespace: "{{SITE_NAMESPACE}}"
-    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_SERVICE_1.yml') }}"
-    validate_certs: false
-- name: Install {{ SITE_NAME }} route on OpenShift
-  k8s:
-    state: present
-    name: "{{ SITE_NAME }}"
-    host: "{{SITE_HOST}}"
-    api_key: "{{SITE_TOKEN}}"
-    namespace: "{{SITE_NAMESPACE}}"
-    definition: "{{ lookup('template', '{{ SITE_SRC }}/openshift/SITE_ROUTE_1.yml') }}"
-    validate_certs: false
-  ignore_errors: true
+- block:
+    - name: Find {{ SITE_NAME }} persistent volume claim for OpenShift
+      find:
+        paths: "{{ SITE_SRC }}/openshift"
+        pattern: "SITE_PERSISTENT_VOLUME_CLAIM_*.yml"
+      register: SITE_PERSISTENT_VOLUME_CLAIMS
+    - name: Install {{ SITE_NAME }} persistent volume claim on OpenShift
+      k8s:
+        state: present
+        name: "{{ SITE_NAME }}"
+        host: "{{SITE_HOST}}"
+        api_key: "{{SITE_TOKEN}}"
+        namespace: "{{SITE_NAMESPACE}}"
+        definition: "{{ lookup('template', '{{ item.path }}') }}"
+        validate_certs: false
+      ignore_errors: true
+      loop: "{{ SITE_PERSISTENT_VOLUME_CLAIMS.files }}"
+- block:
+    - name: Find {{ SITE_NAME }} image stream for OpenShift
+      find:
+        paths: "{{ SITE_SRC }}/openshift"
+        pattern: "SITE_IMAGE_STREAM_*.yml"
+      register: SITE_IMAGE_STREAMS
+    - name: Install {{ SITE_NAME }} image stream on OpenShift
+      k8s:
+        state: present
+        name: "{{ SITE_NAME }}"
+        host: "{{SITE_HOST}}"
+        api_key: "{{SITE_TOKEN}}"
+        namespace: "{{SITE_NAMESPACE}}"
+        definition: "{{ lookup('template', '{{ item.path }}') }}"
+        validate_certs: false
+      loop: "{{ SITE_IMAGE_STREAMS.files }}"
+- block:
+    - name: Find {{ SITE_NAME }} secret for OpenShift
+      find:
+        paths: "{{ SITE_SRC }}/openshift"
+        pattern: "SITE_SECRET_*.yml"
+      register: SITE_SECRETS
+    - name: Install {{ SITE_NAME }} secret on OpenShift
+      k8s:
+        state: present
+        name: "{{ SITE_NAME }}-secret"
+        host: "{{SITE_HOST}}"
+        api_key: "{{SITE_TOKEN}}"
+        namespace: "{{SITE_NAMESPACE}}"
+        definition: "{{ lookup('template', '{{ item.path }}') }}"
+        validate_certs: false
+      loop: "{{ SITE_SECRETS.files }}"
+- block:
+    - name: Find {{ SITE_NAME }} build config for OpenShift
+      find:
+        paths: "{{ SITE_SRC }}/openshift"
+        pattern: "SITE_BUILD_CONFIG_*.yml"
+      register: SITE_BUILD_CONFIGS
+    - name: Install {{ SITE_NAME }} build config on OpenShift
+      k8s:
+        state: present
+        name: "{{ SITE_NAME }}"
+        host: "{{SITE_HOST}}"
+        api_key: "{{SITE_TOKEN}}"
+        namespace: "{{SITE_NAMESPACE}}"
+        definition: "{{ lookup('template', '{{ item.path }}') }}"
+        validate_certs: false
+      loop: "{{ SITE_BUILD_CONFIGS.files }}"
+- block:
+    - name: Find {{ SITE_NAME }} deployment config for OpenShift
+      find:
+        paths: "{{ SITE_SRC }}/openshift"
+        pattern: "SITE_DEPLOYMENT_CONFIG_*.yml"
+      register: SITE_DEPLOYMENT_CONFIGS
+    - name: Install {{ SITE_NAME }} deployment config on OpenShift
+      k8s:
+        state: present
+        name: "{{ SITE_NAME }}"
+        host: "{{SITE_HOST}}"
+        api_key: "{{SITE_TOKEN}}"
+        namespace: "{{SITE_NAMESPACE}}"
+        definition: "{{ lookup('template', '{{ item.path }}') }}"
+        validate_certs: false
+      loop: "{{ SITE_DEPLOYMENT_CONFIGS.files }}"
+- block:
+    - name: Find {{ SITE_NAME }} service for OpenShift
+      find:
+        paths: "{{ SITE_SRC }}/openshift"
+        pattern: "SITE_SERVICE_*.yml"
+      register: SITE_SERVICES
+    - name: Install {{ SITE_NAME }} service on OpenShift
+      k8s:
+        state: present
+        name: "{{ SITE_NAME }}"
+        host: "{{SITE_HOST}}"
+        api_key: "{{SITE_TOKEN}}"
+        namespace: "{{SITE_NAMESPACE}}"
+        definition: "{{ lookup('template', '{{ item.path }}') }}"
+        validate_certs: false
+      loop: "{{ SITE_SERVICES.files }}"
+- block:
+    - name: Find {{ SITE_NAME }} route for OpenShift
+      find:
+        paths: "{{ SITE_SRC }}/openshift"
+        pattern: "SITE_ROUTE_*.yml"
+      register: SITE_ROUTES
+    - name: Install {{ SITE_NAME }} route on OpenShift
+      k8s:
+        state: present
+        name: "{{ SITE_NAME }}"
+        host: "{{SITE_HOST}}"
+        api_key: "{{SITE_TOKEN}}"
+        namespace: "{{SITE_NAMESPACE}}"
+        definition: "{{ lookup('template', '{{ item.path }}') }}"
+        validate_certs: false
+      ignore_errors: true
+      loop: "{{ SITE_ROUTES.files }}"
 - name: Create Solr collection
   shell: "oc login {{ SOLR_HOST }} --token={{ REDHAT_OPENSHIFT_TOKEN }} && oc exec $(oc get pod -l app=solr -o jsonpath='{.items[0].metadata.name}' -n {{ SOLR_NAMESPACE }}) -n {{ SOLR_NAMESPACE }} -- /opt/solr/bin/solr create_collection -c {{ SOLR_COLLECTION }} -n computate || true"
   register: create_collection
